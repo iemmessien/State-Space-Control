@@ -1,7 +1,7 @@
 #include "StateSpace.hpp"
 
 // 0 for FullState   
-//1 for Autonomous
+//1 for Autonomous (to be implamented)
 
     StateSpace::StateSpace(int state, int input, int output, int enumtype)
     {
@@ -14,16 +14,29 @@
         systemMatrix.resize(states,states);  //A
 		inputMatrix.resize(states,inputs);  //B
 		outputMatrix.resize(outputs, states); //C
-		transmissionMatrix.resize(outputs, inputs); //D (will always be 0)
-        //controlInputs.resize();
-		//referenceInputs.resize();
+		transmissionMatrix.resize(outputs, inputs); //D (will always be 0; included for potential future use)
+        controlInputs.resize(inputs, 1); 
+		referenceInputs.resize(outputs, 1);
         
         controlGain.resize(inputs,states); //K
-		integralGain.resize(outputs,outputs);
-		precompensator.resize(inputs,outputs); //N_bar
+		integralGain.resize(outputs,outputs); 
+		compensator.resize(states,inputs); //N_x
+		precompensator.resize(inputs,outputs); //N_u
 		estimatorOutput.resize(states,states); //L
 		
-	
+
+		//Sets all matrices to 0 until the system is initialised
+		systemMatrix.fill(0);  
+		inputMatrix.fill(0); 
+		outputMatrix.fill(0); 
+		transmissionMatrix.fill(0); 
+        controlInputs.fill(0);
+		referenceInputs.fill(0);
+        controlGain.fill(0); 
+		integralGain.fill(0); 
+		precompensator.fill(0); 
+		estimatorOutput.fill(0);
+
 		
     }
 	
@@ -34,11 +47,38 @@
     	outputMatrix = C;
     	controlGain  = K;
 
-    	transmissionMatrix.fill(0);
+    	//Create entire system matrix to Calculate 
+    	Eigen::MatrixXf sys(states+1, states+1);
+    	Eigen::MatrixXf sysInv(states+1, states+1);
+    	Eigen::MatrixXf N(states+1, inputs);
+    	Eigen::MatrixXf BigZero(states+1, inputs); //for a 1 input system, all values are 0 except last element, unsure of the math if multiple inputs
+
+
+    	sys.topLeftCorner(states,states) 	  = systemMatrix;
+    	sys.topRightCorner(states,inputs) 	  = inputMatrix;
+    	sys.bottomLeftCorner(outputs,states)  = outputMatrix;
+    	sys.bottomRightCorner(outputs, inputs)= transmissionMatrix;
+
+    	
+    	sysInv = sys.inverse();
+
+  
+
+    	BigZero.fill(0); 
+    	BigZero.row(states).tail(1) << 1;  //*****TEMPORARY SOLUTION ONLY WORKS WITH 1 INPUT AND OUTPUT*****
+
+    	N = sysInv * BigZero;
+
+    	std::cout<<N;
+
+    	precompensator = N.topLeftCorner(outputs,inputs);
+    	compensator = N.bottomLeftCorner(states,inputs);
+
+    	
 	
 	}
 	
-	void StateSpace::Update(/*Matrix<states> &systemState, float dt*/)
+	Eigen::MatrixXf StateSpace::Calculate()
     {
 
 	}

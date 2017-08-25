@@ -2,14 +2,15 @@
 	File: StateSpace.hpp
 	Description: A Class for creating state space calculations 
 	
-	TODO:
+	TODO: Finish full state
+		  Write autonomous
 
 */
 #ifndef STATE_SPACE_CONTROL_H
 #define STATE_SPACE_CONTROL_H
 
 #include <Eigen>
-
+#include <iostream>
 
 
 class StateSpace{
@@ -29,12 +30,13 @@ private:
     Eigen::MatrixXf controlGain;
     Eigen::MatrixXf integralGain;
     Eigen::MatrixXf precompensator;
+    Eigen::MatrixXf compensator;
 	Eigen::MatrixXf estimatorOutput;
 
 public:
 	StateSpace(int state, int input, int output, int type);
-	void Initialise(Eigen::MatrixXf A, Eigen::MatrixXf B, Eigen::MatrixXf C, Eigen::MatrixXf K);
-	void Update(/*Matrix<states> &systemState, float dt*/);
+	void Initialise(Eigen::MatrixXf A, Eigen::MatrixXf B, Eigen::MatrixXf C, Eigen::MatrixXf K);  // Sets Values of matrices to values defined in the main
+	Eigen::MatrixXf Calculate();	//Determines the output of the system and updates new values
 	
 	
 	

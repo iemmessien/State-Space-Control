@@ -2,9 +2,9 @@
 #include <Eigen>
 #include <iostream>
 
-#define STATES   	3
-#define INPUTS   	1
-#define OUTPUTS		1 
+#define STATES   	3 	 //Number of States
+#define INPUTS   	1	 //Number of Inputs
+#define OUTPUTS		1 	 //Number of Outputs
 #define INERTIA 	0.01 //Rotor Interia
 #define FRICTION	0.1  //viscous coefficient of friction
 #define SMALL_K		0.01 //
@@ -16,11 +16,19 @@ int main(){
 
 
 
-	StateSpace s(STATES,INPUTS,OUTPUTS,0); //3 states, 1 input, 1 output, Full State Feedback
+	StateSpace model(STATES,INPUTS,OUTPUTS,0); //3 states, 1 input, 1 output, Full State Feedback
+	
+	//Set Control/ System Parameters
 	Eigen::MatrixXf A(STATES,STATES);
 	Eigen::MatrixXf B(STATES,INPUTS);
 	Eigen::MatrixXf C(OUTPUTS,STATES);
 	Eigen::MatrixXf K(INPUTS,STATES);
+	Eigen::MatrixXf r(OUTPUTS,1);
+
+	//Set Actual State & Output
+	Eigen::MatrixXf actual(1,3);
+	Eigen::MatrixXf	output(1,1);
+
 
 	A<< 0,	1,						0,
 		0,	-FRICTION/INERTIA,		SMALL_K/INERTIA,
@@ -34,7 +42,14 @@ int main(){
 
 	K<< 2, 32.9, 4; //Calculated values
 
-	s.Initialise(A,B,C,K);
+	r<< 3;
+
+	actual<< 0,
+			 0,
+			 0;
+
+	model.Initialise(A,B,C,K); //D is 0, not included at this time
+	model.setReferenceInputs(r);
 
 
 	return 0;
