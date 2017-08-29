@@ -25,9 +25,7 @@ int main(){
 	Eigen::MatrixXf K(INPUTS,STATES);
 	Eigen::MatrixXf r(OUTPUTS,1);
 
-	//Set Actual State & Output
-	Eigen::MatrixXf actual(1,3);
-	Eigen::MatrixXf	output(1,1);
+
 
 
 	A<< 0,	1,						0,
@@ -40,16 +38,20 @@ int main(){
 
 	C<< 1, 0, 0;
 
-	K<< 2, 32.9, 4; //Calculated values
+	K<< 1, 5, 4; //Calculated values
 
 	r<< 3;
 
-	actual<< 0,
-			 0,
-			 0;
 
 	model.Initialise(A,B,C,K); //D is 0, not included at this time
 	model.setReferenceInputs(r);
+
+	for(int i = 0; i < 5000; i++){
+		model.Calculate();
+		std::cout<<model.getRealOutput()<<'\n';
+	}
+		
+
 
 
 	return 0;

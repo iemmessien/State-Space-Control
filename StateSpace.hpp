@@ -33,6 +33,10 @@ private:
     Eigen::MatrixXf compensator;
 	Eigen::MatrixXf estimatorOutput;
 
+	//Set Actual State & Output
+	Eigen::MatrixXf actual;
+	Eigen::MatrixXf	realOutput;
+
 public:
 	StateSpace(int state, int input, int output, int type);
 	void Initialise(Eigen::MatrixXf A, Eigen::MatrixXf B, Eigen::MatrixXf C, Eigen::MatrixXf K);  // Sets Values of matrices to values defined in the main
@@ -52,6 +56,8 @@ public:
 	Eigen::MatrixXf getIntegralGain();
 	Eigen::MatrixXf getPrecompensator();
 	Eigen::MatrixXf getEstimatorOutput();
+	Eigen::MatrixXf getActual();
+	Eigen::MatrixXf getRealOutput();
 
 	//Set Functions
 	void setControlInputs(Eigen::MatrixXf X);
@@ -64,7 +70,8 @@ public:
 	void setIntegralGain(Eigen::MatrixXf X);
 	void setPrecompensator(Eigen::MatrixXf X);
 	void setEstimatorOutput(Eigen::MatrixXf X);
-	
+	void setActual(Eigen::MatrixXf X);
+	void setRealOutput(Eigen::MatrixXf X);
 
 };
 #endif // STATE_SPACE_CONTROL_H

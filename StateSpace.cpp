@@ -15,15 +15,17 @@
 		inputMatrix.resize(states,inputs);  //B
 		outputMatrix.resize(outputs, states); //C
 		transmissionMatrix.resize(outputs, inputs); //D (will always be 0; included for potential future use)
-        controlInputs.resize(inputs, 1); 
-		referenceInputs.resize(outputs, 1);
+        controlInputs.resize(inputs, 1); //u
+		referenceInputs.resize(outputs, 1); //r
         
         controlGain.resize(inputs,states); //K
 		integralGain.resize(outputs,outputs); 
 		compensator.resize(states,inputs); //N_x
 		precompensator.resize(inputs,outputs); //N_u
 		estimatorOutput.resize(states,states); //L
-		
+
+		actual.resize(states,outputs); //actual state of the system
+		realOutput.resize(1,outputs); //output of the system
 
 		//Sets all matrices to 0 until the system is initialised
 		systemMatrix.fill(0);  
@@ -35,7 +37,10 @@
         controlGain.fill(0); 
 		integralGain.fill(0); 
 		precompensator.fill(0); 
+		compensator.fill(0);
 		estimatorOutput.fill(0);
+		actual.fill(0);
+		realOutput.fill(0);
 
 		
     }
@@ -69,18 +74,26 @@
 
     	N = sysInv * BigZero;
 
-    	std::cout<<N;
+    	
 
     	precompensator = N.topLeftCorner(outputs,inputs);
     	compensator = N.bottomLeftCorner(states,inputs);
-
-    	
 	
 	}
 	
 	Eigen::MatrixXf StateSpace::Calculate()
     {
+    	actual += (systemMatrix * actual + inputMatrix * controlInputs)*0.1;
+	
+		realOutput = outputMatrix * actual;
 
+		
+        controlInputs =  precompensator * referenceInputs - controlGain * (actual-compensator);
+
+     
+        referenceInputs += integralGain * (referenceInputs - outputMatrix * actual) * 0.1;
+
+		return realOutput;
 	}
 	
 	
@@ -115,6 +128,12 @@
 	Eigen::MatrixXf StateSpace::getEstimatorOutput(){
 		return estimatorOutput;
 	}
+	Eigen::MatrixXf StateSpace::getActual(){
+		return actual;
+	}
+	Eigen::MatrixXf StateSpace::getRealOutput(){
+		return realOutput;
+	}
 
 	
 	void StateSpace::setControlInputs(Eigen::MatrixXf X){
@@ -147,6 +166,12 @@
 	}
 	void StateSpace::setEstimatorOutput(Eigen::MatrixXf X){
 		estimatorOutput = X;
+	}
+	void StateSpace::setActual(Eigen::MatrixXf X){
+		actual = X;
+	}
+	void StateSpace::setRealOutput(Eigen::MatrixXf X){
+		realOutput = X;
 	}
 
 
